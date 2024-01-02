@@ -29,7 +29,7 @@ public class ChallengeEntity implements Serializable {
     private Date endDate;
     @Column(nullable = false)
     private int days;
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity userDetails;
 }

@@ -1,15 +1,16 @@
 package dias.photo_app;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @SpringBootApplication
-public class PhotoAppApplication {
+public class ChallengerAppApplication {
 
 	public static void main(String[] args) {
-		SpringApplication.run(PhotoAppApplication.class, args);
+		SpringApplication.run(ChallengerAppApplication.class, args);
 	}
 
 	@Bean
@@ -20,6 +21,11 @@ public class PhotoAppApplication {
 	@Bean
 	public SpringAppContext springAppContext() {
 		return new SpringAppContext();
+	}
+
+	@Bean
+	public ModelMapper modelMapper() {
+		return new ModelMapper();
 	}
 
 }

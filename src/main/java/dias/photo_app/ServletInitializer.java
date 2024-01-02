@@ -7,6 +7,6 @@ import org.springframework.boot.web.servlet.support.SpringBootServletInitializer
 public class ServletInitializer extends SpringBootServletInitializer {
     @Override
     protected SpringApplicationBuilder configure(SpringApplicationBuilder applicationBuilderuilder) {
-        return applicationBuilderuilder.sources(PhotoAppApplication.class);
+        return applicationBuilderuilder.sources(ChallengerAppApplication.class);
     }
 }

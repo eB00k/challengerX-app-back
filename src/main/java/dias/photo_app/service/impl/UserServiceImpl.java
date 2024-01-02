@@ -35,14 +35,14 @@ public class UserServiceImpl implements UserService {
     @Autowired
     BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @Autowired
+    ModelMapper modelMapper;
+
     @Override
     public List<UserDto> getUsers(int page, int limit) {
-        ModelMapper modelMapper = new ModelMapper();
         List<UserDto> returnValue = new ArrayList<>();
         Pageable pageableRequest = PageRequest.of(page, limit);;
         Page<UserEntity> usersPage = userRepository.findAll(pageableRequest);
-        System.out.println(usersPage);
-        System.out.println("<-userPage");
 
         List<UserEntity> users = usersPage.getContent();
 
@@ -56,7 +56,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(String userId) {
-        ModelMapper modelMapper = new ModelMapper();
         UserEntity userEntity = userRepository.findByUserId(userId);
 
         if(userEntity == null) {
@@ -72,7 +71,6 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto createUser(UserDto userDto) {
-        ModelMapper modelMapper = new ModelMapper();
         // checking whether the user with the specified email exists to prevent duplicate records
         UserEntity storedUserDetails = userRepository.findByEmail(userDto.getEmail());
         if(storedUserDetails != null) {
@@ -107,16 +105,11 @@ public class UserServiceImpl implements UserService {
             throw new UsernameNotFoundException(email);
         }
 
-        UserDto returnValue = new UserDto();
-        BeanUtils.copyProperties(userEntity, returnValue);
-
-        return returnValue;
+        return modelMapper.map(userEntity, UserDto.class);
     }
 
     @Override
     public UserDto updateUser(String userId, UserDto userDto) {
-        UserDto returnValue = new UserDto();
-
         UserEntity userEntity = userRepository.findByUserId(userId);
         if(userEntity == null) {
             throw new UsernameNotFoundException(userId);
@@ -125,9 +118,8 @@ public class UserServiceImpl implements UserService {
         userEntity.setFirstName(userDto.getFirstName());
         userEntity.setLastName(userDto.getLastName());
         UserEntity updatedEntity = userRepository.save(userEntity);
-        BeanUtils.copyProperties(updatedEntity, returnValue);
-        System.out.println(returnValue);
-        return returnValue;
+
+        return modelMapper.map(updatedEntity, UserDto.class);
     }
 
     @Override
