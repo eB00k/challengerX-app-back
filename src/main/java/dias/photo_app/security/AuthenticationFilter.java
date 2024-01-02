@@ -60,7 +60,7 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
                 .setSubject(userName)
                 .setExpiration(Date.from(now.plusMillis(SecurityConstants.EXPIRATION_TIME)))
                 .setIssuedAt(Date.from(now))
-                .signWith(secretKey, SignatureAlgorithm.HS256).compact();
+                .signWith(secretKey, SignatureAlgorithm.HS512).compact();
 
         response.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
 

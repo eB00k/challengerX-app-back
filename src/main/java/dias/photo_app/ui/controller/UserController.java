@@ -1,9 +1,11 @@
 package dias.photo_app.ui.controller;
 
-import dias.photo_app.exceptions.UserServiceExceptions;
-import dias.photo_app.io.entity.UserEntity;
+import dias.photo_app.service.ChallengeService;
+import org.modelmapper.ModelMapper;
 import dias.photo_app.service.UserService;
+import dias.photo_app.shared.dto.ChallengeDto;
 import dias.photo_app.shared.dto.UserDto;
+import dias.photo_app.ui.model.request.ChallengeDetailsRequestModel;
 import dias.photo_app.ui.model.request.UserDetailsRequestModel;
 import dias.photo_app.ui.model.response.*;
 import org.springframework.beans.BeanUtils;
@@ -19,17 +21,20 @@ public class UserController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private ChallengeService challengeService;
+
     // GET: http://localhost:4000/photo-app/users?page=0&limit25
     @GetMapping
     public List<UserRest> getUsers(@RequestParam(value = "page", defaultValue = "0") int page,
                                    @RequestParam(value = "limit", defaultValue = "25") int limit) {
+        ModelMapper modelMapper = new ModelMapper();
         List<UserRest> returnValue = new ArrayList<>();
 
         List<UserDto> users = userService.getUsers(page, limit);
 
         for (UserDto userDto : users) {
-            UserRest userModel = new UserRest();
-            BeanUtils.copyProperties(userDto, userModel);
+            UserRest userModel = modelMapper.map(userDto, UserRest.class);
             returnValue.add(userModel);
         }
 
@@ -39,18 +44,18 @@ public class UserController {
     // GET: http://localhost:4000/photo-app/users/userId
     @GetMapping(value = "/{userId}")
     public UserRest getUserById(@PathVariable String userId) {
-        UserRest returnValue = new UserRest();
+        ModelMapper modelMapper = new ModelMapper();
 
         UserDto userDto = userService.getUserById(userId);
-        BeanUtils.copyProperties(userDto, returnValue);
 
-        return returnValue;
+        return modelMapper.map(userDto, UserRest.class);
     }
 
-    // POST: http://localhost:4000/photo-app/users + payload
+    // POST: http://localhost:4000/challenger-app/users + payload
     @PostMapping
     public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails) throws Exception {
         UserRest returnValue = new UserRest();
+        ModelMapper modelMapper = new ModelMapper();
 
         if(userDetails.getFirstName().isEmpty() || userDetails.getLastName().isEmpty() ||
                 userDetails.getEmail().isEmpty() || userDetails.getPassword().isEmpty()) {
@@ -58,14 +63,14 @@ public class UserController {
             throw new NullPointerException("The object is null");
         }
 
-        UserDto userDto = new UserDto();
-        BeanUtils.copyProperties(userDetails, userDto);
+        UserDto userDto = modelMapper.map(userDetails, UserDto.class);
+
         UserDto createdUser = userService.createUser(userDto);
-        BeanUtils.copyProperties(createdUser, returnValue);
-        return returnValue;
+
+        return modelMapper.map(createdUser, UserRest.class);
     }
 
-    // PUT: http://localhost:4000/photo-app/users/userId + payload
+    // PUT: http://localhost:4000/challenger-app/users/userId + payload
     @PutMapping(path="/{userId}")
     public UserRest updateUser(@PathVariable String userId, @RequestBody UserDetailsRequestModel userDetails) {
         UserRest returnValue = new UserRest();
@@ -79,7 +84,7 @@ public class UserController {
         return returnValue;
     }
 
-    // DELETE: http://localhost:4000/photo-app/users/userId
+    // DELETE: http://localhost:4000/challenger-app/users/userId
     @DeleteMapping(path="/{userId}")
     public OperationStatusModel deleteUser(@PathVariable String userId) {
         OperationStatusModel returnValue = new OperationStatusModel();
@@ -89,4 +94,32 @@ public class UserController {
 
         return returnValue;
     }
+
+    // POST: http://localhost:4000/challenger-app/users/{userId}/posts + payload
+    @PostMapping(path = "/{userId}/challenges")
+    public ChallengeRest createChallenge(@PathVariable String userId, @RequestBody ChallengeDetailsRequestModel challengeDetails) {
+        // Validate challengeDetails...
+        System.out.println("cccccccccccc1");
+        ModelMapper modelMapper = new ModelMapper();
+        ChallengeDto challengeDto = modelMapper.map(challengeDetails, ChallengeDto.class);
+        ChallengeDto createdChallenge = challengeService.createChallenge(userId, challengeDto);
+
+        return modelMapper.map(createdChallenge, ChallengeRest.class);
+    }
+
+//    // GET: http://localhost:4000/photo-app/users/{userId}/posts
+//    @GetMapping(path = "/{userId}/posts")
+//    public List<PostRest> getPosts(@PathVariable String userId) {
+//        List<PostRest> returnValue = new ArrayList<>();
+//
+//        List<PostDto> posts = userService.getPosts(userId);
+//
+//        for (PostDto postDto : posts) {
+//            PostRest postModel = new PostRest();
+//            BeanUtils.copyProperties(postDto, postModel);
+//            returnValue.add(postModel);
+//        }
+//
+//        return returnValue;
+//    }
 }

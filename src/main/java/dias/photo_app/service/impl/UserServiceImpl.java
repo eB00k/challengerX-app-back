@@ -1,10 +1,14 @@
 package dias.photo_app.service.impl;
 
+import dias.photo_app.io.entity.ChallengeEntity;
 import dias.photo_app.io.entity.UserEntity;
 import dias.photo_app.io.UserRepository;
 import dias.photo_app.service.UserService;
 import dias.photo_app.shared.Utils;
+import dias.photo_app.shared.dto.ChallengeDto;
 import dias.photo_app.shared.dto.UserDto;
+import jdk.swing.interop.SwingInterOpUtils;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -33,20 +37,18 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserDto> getUsers(int page, int limit) {
+        ModelMapper modelMapper = new ModelMapper();
         List<UserDto> returnValue = new ArrayList<>();
-        Pageable pageableRequest = PageRequest.of(page, limit);
-        System.out.printf("%d %d", page, limit);
-        System.out.println(pageableRequest);
-
+        Pageable pageableRequest = PageRequest.of(page, limit);;
         Page<UserEntity> usersPage = userRepository.findAll(pageableRequest);
         System.out.println(usersPage);
         System.out.println("<-userPage");
+
         List<UserEntity> users = usersPage.getContent();
-        System.out.println(users);
 
         for (UserEntity userEntity : users) {
-            UserDto userDto = new UserDto();
-            BeanUtils.copyProperties(userEntity, userDto);
+            UserDto userDto = modelMapper.map(userEntity, UserDto.class);
+            System.out.println(userDto.getFirstName());
             returnValue.add(userDto);
         }
         return returnValue;
@@ -54,37 +56,48 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUserById(String userId) {
-        UserDto returnValue = new UserDto();
+        ModelMapper modelMapper = new ModelMapper();
         UserEntity userEntity = userRepository.findByUserId(userId);
+
         if(userEntity == null) {
             throw new UsernameNotFoundException(userId);
         }
-        BeanUtils.copyProperties(userEntity, returnValue);
-        return returnValue;
+
+        for(ChallengeEntity challenge : userEntity.getChallenges()) {
+            System.out.println(challenge.getTitle());
+        }
+
+        return modelMapper.map(userEntity, UserDto.class);
     }
 
     @Override
     public UserDto createUser(UserDto userDto) {
-
+        ModelMapper modelMapper = new ModelMapper();
         // checking whether the user with the specified email exists to prevent duplicate records
         UserEntity storedUserDetails = userRepository.findByEmail(userDto.getEmail());
         if(storedUserDetails != null) {
             throw new IllegalArgumentException("Record with such email already exits");
         }
 
-        UserEntity userEntity = new UserEntity();
-        BeanUtils.copyProperties(userDto, userEntity);
+        UserEntity userEntity = modelMapper.map(userDto, UserEntity.class);
+
 
         String publicUserId = utils.generateUserId(30);
         userEntity.setUserId(publicUserId);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
 
+        // a new User
+        UserEntity userDetails = new UserEntity(userEntity.getUserId(),userEntity.getFirstName(), userEntity.getLastName(), userEntity.getEmail(), userEntity.getEncryptedPassword(), userEntity.getEmailVerificationToken(), userEntity.getEmailVerificationStatus());
+
+        // list of challenges
+        for(ChallengeEntity challenge : userEntity.getChallenges()) {
+            challenge.setChallengeId(utils.generateChallengeId(30));
+            challenge.setUserDetails(userDetails);
+            System.out.println(challenge);
+        }
+
         UserEntity storedUser = userRepository.save(userEntity);
-
-        UserDto returnValue = new UserDto();
-        BeanUtils.copyProperties(storedUser, returnValue);
-
-        return returnValue;
+        return modelMapper.map(storedUser, UserDto.class);
     }
 
     @Override
@@ -93,6 +106,7 @@ public class UserServiceImpl implements UserService {
         if(userEntity == null) {
             throw new UsernameNotFoundException(email);
         }
+
         UserDto returnValue = new UserDto();
         BeanUtils.copyProperties(userEntity, returnValue);
 
@@ -102,6 +116,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public UserDto updateUser(String userId, UserDto userDto) {
         UserDto returnValue = new UserDto();
+
         UserEntity userEntity = userRepository.findByUserId(userId);
         if(userEntity == null) {
             throw new UsernameNotFoundException(userId);
@@ -109,7 +124,6 @@ public class UserServiceImpl implements UserService {
 
         userEntity.setFirstName(userDto.getFirstName());
         userEntity.setLastName(userDto.getLastName());
-//        userEntity.setEncryptedPassword(userDto.getEncryptedPassword());
         UserEntity updatedEntity = userRepository.save(userEntity);
         BeanUtils.copyProperties(updatedEntity, returnValue);
         System.out.println(returnValue);
@@ -124,6 +138,8 @@ public class UserServiceImpl implements UserService {
         }
         userRepository.delete(userEntity);
     }
+
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

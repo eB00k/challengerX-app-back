@@ -1,6 +1,7 @@
 package dias.photo_app.service;
 
 import dias.photo_app.io.entity.UserEntity;
+import dias.photo_app.shared.dto.ChallengeDto;
 import dias.photo_app.shared.dto.UserDto;
 import org.springframework.security.core.userdetails.UserDetailsService;
 
@@ -18,4 +19,5 @@ public interface UserService extends UserDetailsService {
     UserDto updateUser(String userId, UserDto userDto);
 
     void deleteUser(String userId);
+
 }
