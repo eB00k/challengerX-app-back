@@ -1,5 +1,6 @@
 package dias.photo_app.service.impl;
 
+import dias.photo_app.exceptions.UserServiceExceptions;
 import dias.photo_app.io.entity.ChallengeEntity;
 import dias.photo_app.io.entity.UserEntity;
 import dias.photo_app.io.UserRepository;
@@ -7,6 +8,7 @@ import dias.photo_app.service.UserService;
 import dias.photo_app.shared.Utils;
 import dias.photo_app.shared.dto.ChallengeDto;
 import dias.photo_app.shared.dto.UserDto;
+import dias.photo_app.ui.model.response.ErrorMessages;
 import jdk.swing.interop.SwingInterOpUtils;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.BeanUtils;
@@ -83,6 +85,8 @@ public class UserServiceImpl implements UserService {
         String publicUserId = utils.generateUserId(30);
         userEntity.setUserId(publicUserId);
         userEntity.setEncryptedPassword(bCryptPasswordEncoder.encode(userDto.getPassword()));
+        userEntity.setEmailVerificationToken(Utils.generateEmailVerificationToken(publicUserId));
+        userEntity.setEmailVerificationStatus(false);
 
         // a new User
         UserEntity userDetails = new UserEntity(userEntity.getUserId(),userEntity.getFirstName(), userEntity.getLastName(), userEntity.getEmail(), userEntity.getEncryptedPassword(), userEntity.getEmailVerificationToken(), userEntity.getEmailVerificationStatus());
@@ -100,27 +104,35 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserDto getUser(String email) {
+        UserDto returnValue = new UserDto();
         UserEntity userEntity = userRepository.findByEmail(email);
+
         if(userEntity == null) {
-            throw new UsernameNotFoundException(email);
+            throw new UserServiceExceptions(ErrorMessages.EMAIL_ADDRESS_NOT_FOUND.getErrorMessage());
         }
 
-        return modelMapper.map(userEntity, UserDto.class);
+        BeanUtils.copyProperties(userEntity, returnValue);
+
+        return returnValue;
     }
 
     @Override
     public UserDto updateUser(String userId, UserDto userDto) {
+        UserDto returnValue = new UserDto();
         UserEntity userEntity = userRepository.findByUserId(userId);
-        if(userEntity == null) {
-            throw new UsernameNotFoundException(userId);
+        if (userEntity == null) {
+            throw new UserServiceExceptions(ErrorMessages.NO_RECORD_FOUND.getErrorMessage());
         }
 
         userEntity.setFirstName(userDto.getFirstName());
         userEntity.setLastName(userDto.getLastName());
         UserEntity updatedEntity = userRepository.save(userEntity);
+        BeanUtils.copyProperties(updatedEntity, returnValue);
 
-        return modelMapper.map(updatedEntity, UserDto.class);
+        return returnValue;
     }
+
+
 
     @Override
     public void deleteUser(String userId) {
@@ -131,7 +143,23 @@ public class UserServiceImpl implements UserService {
         userRepository.delete(userEntity);
     }
 
+    @Override
+    public boolean verifyEmailToken(String token) {
+        boolean returnValue = false;
+        // Find user by token
+        UserEntity userEntity = userRepository.findUserByEmailVerificationToken(token);
 
+        if (userEntity != null) {
+            boolean hasTokenExpired = Utils.hasTokenExpired(token);
+            if (!hasTokenExpired) {
+                userEntity.setEmailVerificationToken(null);
+                userEntity.setEmailVerificationStatus(Boolean.TRUE);
+                userRepository.save(userEntity);
+                returnValue = true;
+            }
+        }
+        return returnValue;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {

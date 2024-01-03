@@ -47,7 +47,6 @@ public class AuthorizationFilter extends BasicAuthenticationFilter {
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
         String authorizationHeader = request.getHeader(SecurityConstants.HEADER_STRING);
 
-        System.out.println("getAuthentification");
         if(authorizationHeader == null) {
             return null;
         }

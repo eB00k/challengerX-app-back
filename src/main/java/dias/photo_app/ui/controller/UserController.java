@@ -11,6 +11,7 @@ import dias.photo_app.ui.model.request.UserDetailsRequestModel;
 import dias.photo_app.ui.model.response.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class UserController {
 
     @Autowired ModelMapper modelMapper;
 
-    // GET: http://localhost:4000/photo-app/users?page=0&limit25
+    // GET: http://localhost:4001/photo-app/users?page=0&limit25
     @GetMapping
     public List<UserRest> getUsers(@RequestParam(value = "page", defaultValue = "0") int page,
                                    @RequestParam(value = "limit", defaultValue = "25") int limit) {
@@ -43,7 +44,7 @@ public class UserController {
         return returnValue;
     }
 
-    // GET: http://localhost:4000/photo-app/users/userId
+    // GET: http://localhost:4001/photo-app/users/userId
     @GetMapping(value = "/{userId}")
     public UserRest getUserById(@PathVariable String userId) {
         UserDto userDto = userService.getUserById(userId);
@@ -51,7 +52,7 @@ public class UserController {
         return modelMapper.map(userDto, UserRest.class);
     }
 
-    // POST: http://localhost:4000/challenger-app/users + payload
+    // POST: http://localhost:4001/challenger-app/users + payload
     @PostMapping
     public UserRest createUser(@RequestBody UserDetailsRequestModel userDetails) throws Exception {
         UserRest returnValue = new UserRest();
@@ -69,24 +70,44 @@ public class UserController {
         return modelMapper.map(createdUser, UserRest.class);
     }
 
-    // PUT: http://localhost:4000/challenger-app/users/userId + payload
+    // PUT: http://localhost:4001/challenger-app/users/userId + payload
     @PutMapping(path="/{userId}")
     public UserRest updateUser(@PathVariable String userId, @RequestBody UserDetailsRequestModel userDetails) {
+        UserRest returnValue = new UserRest();
 
-        UserDto userDto = modelMapper.map(userDetails, UserDto.class);
+        UserDto userDto = new UserDto();
+        BeanUtils.copyProperties(userDetails, userDto);
 
-        UserDto updateUser = userService.updateUser(userId, userDto);
+        UserDto updatedUser = userService.updateUser(userId, userDto);
+        BeanUtils.copyProperties(updatedUser, returnValue);
 
-        return modelMapper.map(updateUser, UserRest.class);
+        return returnValue;
     }
 
-    // DELETE: http://localhost:4000/challenger-app/users/userId
+    // DELETE: http://localhost:4001/challenger-app/users/userId
     @DeleteMapping(path="/{userId}")
     public OperationStatusModel deleteUser(@PathVariable String userId) {
         OperationStatusModel returnValue = new OperationStatusModel();
         userService.deleteUser(userId);
         returnValue.setOperationName(RequestOperationName.DELETE.name());
         returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
+
+        return returnValue;
+    }
+
+    // GET: http://localhost:4001/challenger-app/users/email-verification?token=secret-token-value
+    @GetMapping(path = "/email-verification")
+    public OperationStatusModel verifyEmailToken(@RequestParam(value = "token", defaultValue = "") String token) {
+        OperationStatusModel returnValue = new OperationStatusModel();
+        returnValue.setOperationName(RequestOperationName.VERIFY_EMAIL.name());
+
+        boolean isVerified = userService.verifyEmailToken(token);
+
+        if (isVerified == true) {
+            returnValue.setOperationResult(RequestOperationStatus.SUCCESS.name());
+        } else {
+            returnValue.setOperationResult(RequestOperationStatus.ERROR.name());
+        }
 
         return returnValue;
     }

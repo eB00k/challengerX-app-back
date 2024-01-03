@@ -20,4 +20,5 @@ public interface UserService extends UserDetailsService {
 
     void deleteUser(String userId);
 
+    boolean verifyEmailToken(String token);
 }

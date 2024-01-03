@@ -37,7 +37,6 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
-        System.out.println("Attempting ................................");
         try {
             UserLoginRequestModel credentials =
                     new ObjectMapper().readValue(request.getInputStream(), UserLoginRequestModel.class);
@@ -57,19 +56,15 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
         String userName = ((User) authResult.getPrincipal()).getUsername();
         String token = Jwts.builder()
-                .setSubject(userName)
-                .setExpiration(Date.from(now.plusMillis(SecurityConstants.EXPIRATION_TIME)))
-                .setIssuedAt(Date.from(now))
+                .subject(userName)
+                .expiration(Date.from(now.plusMillis(SecurityConstants.EXPIRATION_TIME)))
+                .issuedAt(Date.from(now))
                 .signWith(secretKey, SignatureAlgorithm.HS512).compact();
 
         response.addHeader(SecurityConstants.HEADER_STRING, SecurityConstants.TOKEN_PREFIX + token);
 
-        System.out.println("Response creating...." );
-        System.out.printf("%s%s", SecurityConstants.TOKEN_PREFIX, token);
         UserService userService = (UserService) SpringAppContext.getBean("userServiceImpl");
-        System.out.println("Response creating...."+ userService);
         UserDto userDto = userService.getUser(userName);
-        System.out.println(userDto);
         response.addHeader("UserId", userDto.getUserId());
     }
 }

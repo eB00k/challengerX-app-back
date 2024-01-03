@@ -24,7 +24,7 @@ public class ChallengeController {
     @Autowired
     ModelMapper modelMapper;
 
-    // POST: http://localhost:4000/challenger-app/users/{userId}/challenges + payload
+    // POST: http://localhost:4001/challenger-app/users/{userId}/challenges + payload
     @PostMapping(path = "/{userId}/challenges")
     public ChallengeRest createChallenge(@PathVariable String userId, @RequestBody ChallengeDetailsRequestModel challengeDetails) {
         // Validate challengeDetails...
@@ -35,7 +35,7 @@ public class ChallengeController {
         return modelMapper.map(createdChallenge, ChallengeRest.class);
     }
 
-    // GET: http://localhost:4000/challenger-app/users/{userId}/challenges
+    // GET: http://localhost:4001/challenger-app/users/{userId}/challenges
     @GetMapping(path = "/{userId}/challenges")
     public List<ChallengeRest> getChallenges(@PathVariable String userId) {
         List<ChallengeRest> returnValue = new ArrayList<>();
@@ -49,7 +49,7 @@ public class ChallengeController {
         return returnValue;
     }
 
-    // GET: http://localhost:4000/challenger-app/users/{userId}/challenges/{challengeId}
+    // GET: http://localhost:4001/challenger-app/users/{userId}/challenges/{challengeId}
     @GetMapping(path = "/{userId}/challenges/{challengeId}")
     public ChallengeRest getChallengeById(@PathVariable String userId, @PathVariable String challengeId) {
         ChallengeDto challenge = challengeService.getChallengeById(userId, challengeId);
@@ -60,6 +60,7 @@ public class ChallengeController {
         return modelMapper.map(challenge, ChallengeRest.class);
     }
 
+    // UPDATE: http://localhost:4001/challenger-app/users/{userId}/challenges/{challengeId} + payload
     @PutMapping(path = "/{userId}/challenges/{challengeId}")
     public ChallengeRest updateChallenge(
             @PathVariable String userId,
@@ -73,6 +74,7 @@ public class ChallengeController {
         return modelMapper.map(updatedChallenge, ChallengeRest.class);
     }
 
+    // DELETE: http://localhost:4001/challenger-app/users/{userId}/challenges/{challengeId}
     @DeleteMapping(path = "/{userId}/challenges/{challengeId}")
     public OperationStatusModel deleteChallenge(@PathVariable String userId, @PathVariable String challengeId) {
         OperationStatusModel returnValue = new OperationStatusModel();
