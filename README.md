@@ -4,7 +4,7 @@
 
 Welcome to the Challenger-X app! This project focuses on providing users with a platform to set and track personal goals through challenges. The app offers a dynamic experience where users can create, update, retrieve, and delete both user accounts and challenges. The endpoints are designed to empower users in actively pursuing and accomplishing their individual goals within the Challenger-X app.
 
-#### Link to AWS tomcat:
+#### Link to AWS tomcat: http://ec2-16-171-146-102.eu-north-1.compute.amazonaws.com:8080/challenger-app/
 
 ## API Documentation
 
@@ -52,6 +52,8 @@ Welcome to the Challenger-X app! This project focuses on providing users with a 
 
 3. **PUT /users/{userId}/challenges/{challengeId}/days/{challengeDayId}**
     - Update the status of a specific challenge day.
+
+![img.png](img.png)
 
 ### Getting Started
 
