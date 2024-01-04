@@ -1,11 +1,14 @@
 package dias.photo_app.service.impl;
 
 import dias.photo_app.exceptions.ChallengeServiceExceptions;
+import dias.photo_app.io.ChallengeDayRepository;
 import dias.photo_app.io.ChallengeRepository;
 import dias.photo_app.io.UserRepository;
+import dias.photo_app.io.entity.ChallengeDayEntity;
 import dias.photo_app.io.entity.ChallengeEntity;
 import dias.photo_app.io.entity.UserEntity;
 import dias.photo_app.service.ChallengeService;
+import dias.photo_app.shared.DayStatus;
 import dias.photo_app.shared.Utils;
 import dias.photo_app.shared.dto.ChallengeDto;
 import org.modelmapper.ModelMapper;
@@ -24,6 +27,8 @@ public class ChallengeServiceImpl implements ChallengeService {
     @Autowired
     private ChallengeRepository challengeRepository;
     @Autowired
+    private ChallengeDayRepository challengeDayRepository;
+    @Autowired
     Utils utils;
     @Autowired
     ModelMapper modelMapper;
@@ -37,7 +42,20 @@ public class ChallengeServiceImpl implements ChallengeService {
         ChallengeEntity challengeEntity = modelMapper.map(challengeDto, ChallengeEntity.class);
         challengeEntity.setUserDetails(userEntity);
         challengeEntity.setChallengeId(utils.generateChallengeId(30));
+
         ChallengeEntity savedChallenge = challengeRepository.save(challengeEntity);
+
+        // creating ChallengeDayEntity instances for each day
+        for (int dayNumber = 1; dayNumber <= challengeDto.getDays(); dayNumber++) {
+            ChallengeDayEntity challengeDayEntity = new ChallengeDayEntity();
+            challengeDayEntity.setChallengeDayId(utils.generateChallengeId(30));
+            challengeDayEntity.setDayNumber(dayNumber);
+            challengeDayEntity.setDayStatus(DayStatus.FUTURE); // Set default status as FUTURE
+            challengeDayEntity.setChallenge(savedChallenge);
+
+            // Save the ChallengeDayEntity
+            challengeDayRepository.save(challengeDayEntity);
+        }
 
         return modelMapper.map(savedChallenge, ChallengeDto.class);
     }

@@ -1,8 +1,12 @@
 package dias.photo_app.ui.controller;
 
 import dias.photo_app.exceptions.ChallengeServiceExceptions;
+import dias.photo_app.service.ChallengeDayService;
 import dias.photo_app.service.ChallengeService;
+import dias.photo_app.shared.DayStatus;
+import dias.photo_app.shared.dto.ChallengeDayDto;
 import dias.photo_app.shared.dto.ChallengeDto;
+import dias.photo_app.ui.model.request.ChallengeDayRequestModel;
 import dias.photo_app.ui.model.request.ChallengeDetailsRequestModel;
 import dias.photo_app.ui.model.response.ChallengeRest;
 import dias.photo_app.ui.model.response.OperationStatusModel;
@@ -20,6 +24,9 @@ import java.util.List;
 public class ChallengeController {
     @Autowired
     ChallengeService challengeService;
+
+    @Autowired
+    ChallengeDayService challengeDayService;
 
     @Autowired
     ModelMapper modelMapper;
@@ -89,6 +96,26 @@ public class ChallengeController {
         }
 
         return returnValue;
+    }
+
+    @GetMapping(path = "/{userId}/challenges/{challengeId}/days")
+    public List<ChallengeDayDto> getAllChallengeDays(@PathVariable String userId, @PathVariable String challengeId) {
+        return challengeDayService.getAllChallengeDays(userId, challengeId);
+    }
+
+    @PutMapping("/{userId}/challenges/{challengeId}/days/{challengeDayId}")
+    public ChallengeDayDto updateChallengeDayStatus(
+            @PathVariable String challengeDayId,
+            @RequestBody ChallengeDayRequestModel challengeDayRequestModel, @PathVariable String challengeId) {
+        return challengeDayService.updateChallengeDayStatus(challengeDayId, challengeDayRequestModel.getDayStatus());
+    }
+
+    @GetMapping("/{userId}/challenges/{challengeId}/days/{challengeDayId}")
+    public ChallengeDayDto getChallengeDayById(
+            @PathVariable String userId,
+            @PathVariable String challengeId,
+            @PathVariable String challengeDayId) {
+        return challengeDayService.getChallengeDayById(challengeDayId);
     }
 
 }

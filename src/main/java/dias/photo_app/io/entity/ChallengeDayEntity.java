@@ -7,8 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -22,12 +20,12 @@ public class ChallengeDayEntity implements Serializable {
     @Column(nullable = false)
     private int dayNumber;
 
+    @Column(nullable = false)
+    private String challengeDayId;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private DayStatus dayStatus;
-
-    @OneToMany(mappedBy = "challengeDay", cascade = CascadeType.ALL)
-    private List<TaskEntity> tasks = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "challenge_id")

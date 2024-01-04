@@ -4,6 +4,8 @@
 
 Welcome to the Challenger-X app! This project focuses on providing users with a platform to set and track personal goals through challenges. The app offers a dynamic experience where users can create, update, retrieve, and delete both user accounts and challenges. The endpoints are designed to empower users in actively pursuing and accomplishing their individual goals within the Challenger-X app.
 
+#### Link to AWS tomcat:
+
 ## API Documentation
 
 ### User Endpoints
@@ -40,7 +42,18 @@ Welcome to the Challenger-X app! This project focuses on providing users with a 
 5. **DELETE /users/{userId}/challenges/{challengeId}**
     - Delete a challenge by challenge ID for a specific user.
 
-## Getting Started
+### Challenge Day Endpoints
+
+1. **GET /users/{userId}/challenges/{challengeId}/days**
+    - Retrieve all days of a challenge.
+
+2. **GET /users/{userId}/challenges/{challengeId}/days/{challengeDayId}**
+    - Retrieve details of a specific challenge day.
+
+3. **PUT /users/{userId}/challenges/{challengeId}/days/{challengeDayId}**
+    - Update the status of a specific challenge day.
+
+### Getting Started
 
 To start using the Challenger-X app, follow these steps:
 
@@ -56,16 +69,6 @@ To start using the Challenger-X app, follow these steps:
 4. **Explore Endpoints:**
     - Refer to the provided API documentation for a comprehensive guide on available endpoints.
 
-## Troubleshooting Tomcat Issue
+## License
 
-I have encounter any issues related to Tomcat during the setup of the Challenger-X app, specifically with file uploads, you may need to adjust the configuration. Follow the steps in the [Troubleshooting Tomcat Issue](#troubleshooting-tomcat-issue) section of this README.
-1. Locate the `web.xml` file in the following path:z
-2. 2. Inside the `web.xml` file, locate the `<multipart-config>` section.
-
-3. Edit the `max-file-size` and `max-request-size` parameters to accommodate the size of files you need to upload. In this example, the values are set to 72 MB:
-```xml
-<multipart-config>
-    <max-file-size>72428800</max-file-size>
-    <max-request-size>72428800</max-request-size>
-    <file-size-threshold>0</file-size-threshold>
-</multipart-config>
+This project is licensed under the [MIT License](LICENSE).
