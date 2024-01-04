@@ -29,8 +29,6 @@ public class UserEntity {
     private String encryptedPassword;
     private String emailVerificationToken;
     private Boolean emailVerificationStatus = false;
-//    @OneToMany(targetEntity = ChallengeEntity.class, cascade = CascadeType.ALL)
-//    @JoinColumn(name = "user_id", referencedColumnName = "id")
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "userDetails", cascade = CascadeType.ALL)
     private List<ChallengeEntity> challenges = new ArrayList<>();
 

@@ -6,7 +6,9 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -32,4 +34,7 @@ public class ChallengeEntity implements Serializable {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private UserEntity userDetails;
+    @OneToMany(mappedBy = "challenge", cascade = CascadeType.ALL)
+    private List<ChallengeDayEntity> challengeDays = new ArrayList<>();
+
 }
